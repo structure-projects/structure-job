@@ -8,11 +8,10 @@ public enum GlueTypeEnum {
     BEAN("BEAN", false, null, null),
     GLUE_GROOVY("GLUE(Java)", false, null, null),
     GLUE_SHELL("GLUE(Shell)", true, "bash", ".sh"),
-    GLUE_PYTHON("GLUE(Python3)", true, "python3", ".py"),
-    GLUE_PYTHON2("GLUE(Python2)", true, "python", ".py"),
+    GLUE_PYTHON("GLUE(Python)", true, "python", ".py"),
+    GLUE_PHP("GLUE(PHP)", true, "php", ".php"),
     GLUE_NODEJS("GLUE(Nodejs)", true, "node", ".js"),
-    GLUE_POWERSHELL("GLUE(PowerShell)", true, "powershell", ".ps1"),
-    GLUE_PHP("GLUE(PHP)", true, "php", ".php");
+    GLUE_POWERSHELL("GLUE(PowerShell)", true, "powershell", ".ps1");
 
     private String desc;
     private boolean isScript;
@@ -42,8 +41,8 @@ public enum GlueTypeEnum {
         return suffix;
     }
 
-    public static GlueTypeEnum match(String name) {
-        for (GlueTypeEnum item : GlueTypeEnum.values()) {
+    public static GlueTypeEnum match(String name){
+        for (GlueTypeEnum item: GlueTypeEnum.values()) {
             if (item.name().equals(name)) {
                 return item;
             }

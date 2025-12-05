@@ -15,7 +15,7 @@ public class NetUtil {
     private static Logger logger = LoggerFactory.getLogger(NetUtil.class);
 
     /**
-     * find available port
+     * find avaliable port
      *
      * @param defaultPort
      * @return
@@ -29,7 +29,7 @@ public class NetUtil {
                 portTmp++;
             }
         }
-        portTmp = defaultPort - 1;
+        portTmp = defaultPort--;
         while (portTmp > 0) {
             if (!isPortUsed(portTmp)) {
                 return portTmp;
@@ -53,7 +53,7 @@ public class NetUtil {
             serverSocket = new ServerSocket(port);
             used = false;
         } catch (IOException e) {
-            logger.info(">>>>>>>>>>> xxl-job, port[{}] is in use.", port);
+            logger.info(">>>>>>>>>>> xxl-rpc, port[{}] is in use.", port);
             used = true;
         } finally {
             if (serverSocket != null) {
