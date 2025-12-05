@@ -6,3 +6,4 @@ structure:
     admin-address: http://localhost:8080/xxl-job-admin/
     executor:
       appname: xxl-job-executor-sample
+    access-token: xxl-job-admin-token
