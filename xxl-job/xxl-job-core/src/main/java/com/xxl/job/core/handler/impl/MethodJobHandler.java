@@ -1,7 +1,9 @@
 package com.xxl.job.core.handler.impl;
 
+import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.IJobHandler;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -18,36 +20,31 @@ public class MethodJobHandler extends IJobHandler {
         this.target = target;
         this.method = method;
 
-        this.initMethod = initMethod;
-        this.destroyMethod = destroyMethod;
+        this.initMethod =initMethod;
+        this.destroyMethod =destroyMethod;
     }
 
     @Override
-    public void execute() throws Exception {
-        Class<?>[] paramTypes = method.getParameterTypes();
-        if (paramTypes.length > 0) {
-            method.invoke(target, new Object[paramTypes.length]);       // method-param can not be primitive-types
-        } else {
-            method.invoke(target);
-        }
+    public ReturnT<String> execute(String param) throws Exception {
+        return (ReturnT<String>) method.invoke(target, new Object[]{param});
     }
 
     @Override
-    public void init() throws Exception {
-        if (initMethod != null) {
+    public void init() throws InvocationTargetException, IllegalAccessException {
+        if(initMethod != null) {
             initMethod.invoke(target);
         }
     }
 
     @Override
-    public void destroy() throws Exception {
-        if (destroyMethod != null) {
+    public void destroy() throws InvocationTargetException, IllegalAccessException {
+        if(destroyMethod != null) {
             destroyMethod.invoke(target);
         }
     }
 
     @Override
     public String toString() {
-        return super.toString() + "[" + target.getClass() + "#" + method.getName() + "]";
+        return super.toString()+"["+ target.getClass() + "#" + method.getName() +"]";
     }
 }

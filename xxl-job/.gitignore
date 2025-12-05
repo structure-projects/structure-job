@@ -4,5 +4,4 @@
 *.iml
 target/
 .DS_Store
-xxl-job/.gitattributes
-./applogs
+.gitattributes
