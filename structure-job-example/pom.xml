@@ -4,12 +4,14 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>structure-job-example</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>structure-job-exp</name>
+    <name>structure-job-example</name>
     <url>http://maven.apache.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <structure.version>1.2.3</structure.version>
+        <structure.version>1.2.4</structure.version>
+        <xxl-job.version>2.2.0</xxl-job.version>
+        <structure-job.version>1.0.1</structure-job.version>
     </properties>
 
 
@@ -22,7 +24,7 @@
         <dependency>
             <groupId>cn.structured</groupId>
             <artifactId>structure-job-starter</artifactId>
-            <version>${structure.version}</version>
+            <version>${structure-job.version}</version>
         </dependency>
     </dependencies>
 
