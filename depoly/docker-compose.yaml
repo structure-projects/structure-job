@@ -16,12 +16,12 @@ services:
     environment:
       - JAVA_OPTS=-Xms256m -Xmx1024m
       - PARAMS=-Dfile.encoding=UTF-8 -Dspring.profiles.active=dev -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Asia/Shanghai
-    healthcheck: #健康检查的探针，这里使用spring-boot的健康检查并没有对端口进行探测
-      test: [ "CMD","/bin/sh","/app/liveness.sh" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+#    healthcheck: #健康检查的探针，这里使用spring-boot的健康检查并没有对端口进行探测
+#      test: [ "CMD","/bin/sh","/app/liveness.sh" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 40s
 networks:
   structure-cloud-work:
     driver: overlay
