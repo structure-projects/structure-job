@@ -1,12 +1,10 @@
-FROM openjdk:8-jre-slim
+FROM eclipse-temurin:8-jdk-alpine
 MAINTAINER xuxueli
-
-ENV PARAMS=""
+ADD target/xxl-job-admin-*.jar /app.jar
 
 ENV TZ=PRC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-ADD target/xxl-job-admin-*.jar /app.jar
-
-ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS /app.jar $PARAMS"]
+ENV PARAMS=""
+ENV JAVA_OPTS=""
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS $PARAMS -jar /app.jar","-ea","&"]
 EXPOSE 8080
