@@ -9,7 +9,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <structure.version>1.2.4</structure.version>
+        <structure.version>1.2.10</structure.version>
         <xxl-job.version>2.2.0</xxl-job.version>
         <structure-job.version>1.0.1</structure-job.version>
     </properties>

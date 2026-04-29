@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.structured</groupId>
         <artifactId>structure-dependencies</artifactId>
-        <version>1.2.4</version>
+        <version>1.2.10</version>
     </parent>
 
     <name>structure-job-starter</name>
@@ -17,7 +17,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <revision>1.0.1</revision>
+        <revision>1.0.1-SNAPSHOT</revision>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <xxl-job.version>2.2.0</xxl-job.version>

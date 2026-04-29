@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM eclipse-temurin:8-jdk-alpine
 MAINTAINER xuxueli
 ADD target/xxl-job-admin-*.jar /app.jar
 
