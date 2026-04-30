@@ -53,27 +53,4 @@ jobs:
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-    - name: Build xxl-job
-      run: |
-        cd xxl-job
-        mvn clean package -Dmaven.test.skip=true -Drevision=$RELEASE_VERSION
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Login to Aliyun ACR
-      uses: docker/login-action@v3
-      with:
-        registry: registry.cn-hangzhou.aliyuncs.com
-        username: ${{ secrets.ALIYUN_ACR_USERNAME }}
-        password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./xxl-job/xxl-job-admin
-        push: true
-        tags: |
-          registry.cn-hangzhou.aliyuncs.com/structured/structured-job-center:${{ env.RELEASE_VERSION }}
-          registry.cn-hangzhou.aliyuncs.com/structured/structured-job-center:latest
 
