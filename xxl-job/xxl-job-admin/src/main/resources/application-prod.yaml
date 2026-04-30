@@ -6,7 +6,7 @@ spring:
   datasource:
     username: job
     password: 8XwdAMXdAPnTbDKK
-    url: jdbc:mysql://172.24.20.15:13306/job?useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.0.152:13306/job?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
