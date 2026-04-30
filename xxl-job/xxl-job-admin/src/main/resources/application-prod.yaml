@@ -1,42 +1,12 @@
-
-# 基础服务器配置
 server:
   port: 8080
   servlet:
     context-path: /xxl-job-admin
-
-# Actuator监控端点配置
-management:
-  server:
-    servlet:
-      context-path: /actuator
-  health:
-    mail:
-      enabled: false
-
-# Spring MVC静态资源配置
 spring:
-  mvc:
-    servlet:
-      load-on-startup: 0
-    static-path-pattern: /static/**
-  resources:
-    static-locations: classpath:/static/
-
-  # Freemarker模板引擎配置
-  freemarker:
-    templateLoaderPath: classpath:/templates/
-    suffix: .ftl
-    charset: UTF-8
-    request-context-attribute: request
-    settings:
-      number_format: 0.##########
-
-  # 数据源配置
   datasource:
-    url: jdbc:mysql://192.168.0.152:13306/job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     username: job
     password: 8XwdAMXdAPnTbDKK
+    url: jdbc:mysql://172.24.20.15:13306/job?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -44,28 +14,26 @@ spring:
       maximum-pool-size: 30
       auto-commit: true
       idle-timeout: 30000
-      pool-name: HikariCP
+      pool-name: xxl-job-HikariCP
       max-lifetime: 900000
       connection-timeout: 10000
       connection-test-query: SELECT 1
-
-  # 邮件配置
   mail:
-    host: smtp.qq.com
+    host: smtp.qq.com #邮件服务器地址
     port: 25
     username: xxx@qq.com
     password: xxx
+    default-encoding: UTF-8 #默认编码格式
     properties:
       mail:
+        debug: false #启动debug调试
         smtp:
           auth: true
           starttls:
             enable: true
             required: true
           socketFactory:
-            class: javax.net.ssl.SSLSocketFactory
-
-  # Flyway数据库迁移配置
+            class: javax.net.ssl.SSLSocketFactory #SSL连接配置
   flyway:
     enabled: true # 开启flyway
     clean-disabled: true # 禁止清理数据表
@@ -77,12 +45,30 @@ spring:
     validate-on-migrate: true # 执行迁移时是否自动调用验证
     locations: classpath:migration
   # 配置数据库，flyway那边就无需再进行数据的配置了
-# MyBatis配置
-mybatis:
-  mapper-locations: classpath:/mybatis-mapper/*Mapper.xml
-  # type-aliases-package: com.xxl.job.admin.core.model
+  mvc:
+    servlet:
+      load-on-startup: 0
+    static-path-pattern: /static/**
+  web:
+    resources:
+      static-locations: classpath:/static/
 
-# XXL-Job调度中心配置
+  # Freemarker模板引擎配置
+  freemarker:
+    templateLoaderPath: classpath:/templates/
+    suffix: .ftl
+    charset: UTF-8
+    request-context-attribute: request
+    settings:
+      number_format: 0.##########
+#mybatis.type-aliases-package=com.xxl.job.admin.core.model
+
+structure:
+  log:
+    aop:
+      expression: execution(public * com.xxl.job.admin.controller..*Controller.*(..))
+
+
 xxl:
   job:
     accessToken: xxl-job-admin-token
@@ -94,7 +80,5 @@ xxl:
         max: 100
     logretentiondays: 30
 
-structure:
-  log:
-    aop:
-      expression: execution(public * com.xxl.job.admin.controller..*Controller.*(..))
+mybatis:
+  mapper-locations: classpath*:mybatis-mapper/*.xml
