@@ -4,9 +4,9 @@ server:
     context-path: /xxl-job-admin
 spring:
   datasource:
-    username: job
-    password: 8XwdAMXdAPnTbDKK
-    url: jdbc:mysql://192.168.0.152:13306/job?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    url: jdbc:mysql://mysql:3306/job?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
