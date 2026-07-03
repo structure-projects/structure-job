@@ -40,15 +40,15 @@ jobs:
             echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           fi
 
-      - name: Build project
+      - name: Install xxl-job to local Maven repository
         run: |
           cd xxl-job
-          mvn clean install -Dmaven.test.skip=true -Drevision=$RELEASE_VERSION -s ../.mvn/settings.xml
+          mvn clean install -Dmaven.test.skip=true
 
-      - name: Build xxl-job
+      - name: Build structure-job-server
         run: |
-          cd xxl-job
-          mvn clean package -Dmaven.test.skip=true -Drevision=$RELEASE_VERSION
+          cd structure-job-server
+          mvn clean package -Dmaven.test.skip=true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -63,7 +63,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./xxl-job/xxl-job-admin
+          context: ./structure-job-server
           push: true
           tags: |
             registry.cn-hangzhou.aliyuncs.com/structured/structured-job-center:${{ env.RELEASE_VERSION }}

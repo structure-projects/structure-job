@@ -1,6 +1,6 @@
-FROM eclipse-temurin:8-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 MAINTAINER xuxueli
-ADD target/xxl-job-admin-*.jar /app.jar
+ADD target/structure-job-server-*.jar /app.jar
 
 ENV TZ=PRC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
