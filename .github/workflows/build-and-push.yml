@@ -43,7 +43,7 @@ jobs:
       - name: Install xxl-job to local Maven repository
         run: |
           cd xxl-job
-          mvn clean install -Dmaven.test.skip=true -Dgpg.skip=true
+          mvn clean install -Dmaven.test.skip=true -P !release
 
       - name: Build structure-job-server
         run: |
