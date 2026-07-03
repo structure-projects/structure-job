@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://172.24.20.15:3306/xxl_job?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mysql://172.24.20.15:3306/xxl_job?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -19,6 +19,7 @@ spring:
     port: 25
     username: xxx@qq.com
     password: xxx
+    from: xxx@qq.com
     default-encoding: UTF-8 #默认编码格式
     properties:
       mail:
@@ -69,12 +70,26 @@ xxl:
   job:
     accessToken: xxl-job-admin-token
     i18n: zh_CN
+    timeout: 30
     triggerpool:
       fast:
         max: 200
       slow:
         max: 100
+    schedule:
+      batchsize: 100
     logretentiondays: 30
 
+xxl-sso:
+  token:
+    key: xxl_job_login_token
+    timeout: 604800000
+  client:
+    excluded:
+      paths: /api/**
+    login:
+      path: /auth/login
+
 mybatis:
-  mapper-locations: classpath*:mybatis-mapper/*.xml
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.xxl.job.admin.business.model

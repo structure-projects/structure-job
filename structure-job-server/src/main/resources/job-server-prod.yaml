@@ -71,6 +71,7 @@ xxl:
   job:
     accessToken: xxl-job-admin-token
     i18n: zh_CN
+    timeout: 30
     triggerpool:
       fast:
         max: 200
@@ -78,5 +79,16 @@ xxl:
         max: 100
     logretentiondays: 30
 
+xxl-sso:
+  token:
+    key: xxl_job_login_token
+    timeout: 604800000
+  client:
+    excluded:
+      paths:
+    login:
+      path: /auth/login
+
 mybatis:
-  mapper-locations: classpath*:mybatis-mapper/*.xml
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.xxl.job.admin.business.model

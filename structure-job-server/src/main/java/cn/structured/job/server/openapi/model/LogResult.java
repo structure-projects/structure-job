@@ -1,4 +1,4 @@
-package com.xxl.job.core.biz.model;
+package cn.structured.job.server.openapi.model;
 
 import java.io.Serializable;
 

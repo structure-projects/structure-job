@@ -3,6 +3,7 @@ package cn.structure.job.configuration;
 import cn.structure.job.properties.JobProperties;
 import cn.structure.job.rpc.XxlJobClient;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -10,7 +11,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Resource;
 
 /**
  * 自动调度装配
@@ -28,7 +28,7 @@ public class AutoConfiguration {
     private JobProperties jobProperties;
 
     @Bean
-    @ConditionalOnMissingBean({JobProperties.class})
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(
             name = {"structure.job.enable"},
             havingValue = "true"
@@ -48,7 +48,7 @@ public class AutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean({JobProperties.class})
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = {"structure.job.enable"},
             havingValue = "true")
     public XxlJobClient xxlJobClient() {
