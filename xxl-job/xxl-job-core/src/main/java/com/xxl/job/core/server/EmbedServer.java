@@ -1,12 +1,16 @@
 package com.xxl.job.core.server;
 
-import com.xxl.job.core.biz.ExecutorBiz;
-import com.xxl.job.core.biz.impl.ExecutorBizImpl;
-import com.xxl.job.core.biz.model.*;
-import com.xxl.job.core.thread.ExecutorRegistryThread;
-import com.xxl.job.core.util.GsonTool;
-import com.xxl.job.core.util.ThrowableUtil;
-import com.xxl.job.core.util.XxlJobRemotingUtil;
+import com.xxl.job.core.constant.Const;
+import com.xxl.job.core.executor.XxlJobExecutor;
+import com.xxl.job.core.openapi.ExecutorBiz;
+import com.xxl.job.core.openapi.impl.ExecutorBizImpl;
+import com.xxl.job.core.openapi.model.IdleBeatRequest;
+import com.xxl.job.core.openapi.model.KillRequest;
+import com.xxl.job.core.openapi.model.LogRequest;
+import com.xxl.job.core.openapi.model.TriggerRequest;
+import com.xxl.tool.error.ThrowableTool;
+import com.xxl.tool.json.GsonTool;
+import com.xxl.tool.response.Response;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -33,13 +37,19 @@ public class EmbedServer {
     private ExecutorBiz executorBiz;
     private Thread thread;
 
-    public void start(final String address, final int port, final String appname, final String accessToken) {
-        executorBiz = new ExecutorBizImpl();
-        thread = new Thread(new Runnable() {
+    public void start(final XxlJobExecutor xxlJobExecutor) {
 
+        /**
+         * init executor biz service
+         */
+        executorBiz = new ExecutorBizImpl();
+
+        /**
+         * start server
+         */
+        thread = new Thread(new Runnable() {
             @Override
             public void run() {
-
                 // param
                 EventLoopGroup bossGroup = new NioEventLoopGroup();
                 EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -52,7 +62,7 @@ public class EmbedServer {
                         new ThreadFactory() {
                             @Override
                             public Thread newThread(Runnable r) {
-                                return new Thread(r, "xxl-rpc, EmbedServer bizThreadPool-" + r.hashCode());
+                                return new Thread(r, "xxl-job, EmbedServer bizThreadPool-" + r.hashCode());
                             }
                         },
                         new RejectedExecutionHandler() {
@@ -61,8 +71,6 @@ public class EmbedServer {
                                 throw new RuntimeException("xxl-job, EmbedServer bizThreadPool is EXHAUSTED!");
                             }
                         });
-
-
                 try {
                     // start server
                     ServerBootstrap bootstrap = new ServerBootstrap();
@@ -75,53 +83,50 @@ public class EmbedServer {
                                             .addLast(new IdleStateHandler(0, 0, 30 * 3, TimeUnit.SECONDS))  // beat 3N, close if idle
                                             .addLast(new HttpServerCodec())
                                             .addLast(new HttpObjectAggregator(5 * 1024 * 1024))  // merge request & reponse to FULL
-                                            .addLast(new EmbedHttpServerHandler(executorBiz, accessToken, bizThreadPool));
+                                            .addLast(new EmbedHttpServerHandler(executorBiz, xxlJobExecutor.getAccessToken(), bizThreadPool));
                                 }
                             })
                             .childOption(ChannelOption.SO_KEEPALIVE, true);
 
                     // bind
-                    ChannelFuture future = bootstrap.bind(port).sync();
+                    ChannelFuture future = bootstrap.bind(xxlJobExecutor.getPort()).sync();
 
-                    logger.info(">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}", EmbedServer.class, port);
+                    logger.info(">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}", EmbedServer.class, xxlJobExecutor.getPort());
 
                     // start registry
-                    startRegistry(appname, address);
+                    xxlJobExecutor.getExecutorRegistryThreadHelper().start(xxlJobExecutor);
 
                     // wait util stop
                     future.channel().closeFuture().sync();
 
                 } catch (InterruptedException e) {
-                    if (e instanceof InterruptedException) {
-                        logger.info(">>>>>>>>>>> xxl-job remoting server stop.");
-                    } else {
-                        logger.error(">>>>>>>>>>> xxl-job remoting server error.", e);
-                    }
+                    logger.info(">>>>>>>>>>> xxl-job remoting server stop.");
+                } catch (Throwable e) {
+                    logger.error(">>>>>>>>>>> xxl-job remoting server error.", e);
                 } finally {
                     // stop
                     try {
                         workerGroup.shutdownGracefully();
                         bossGroup.shutdownGracefully();
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         logger.error(e.getMessage(), e);
                     }
                 }
-
             }
-
         });
-        thread.setDaemon(true);	// daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
+        thread.setDaemon(true);    // daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
+        thread.setName("xxl-job, EmbedServer");
         thread.start();
     }
 
-    public void stop() throws Exception {
+    public void stop(final XxlJobExecutor xxlJobExecutor) throws Exception {
         // destroy server thread
-        if (thread!=null && thread.isAlive()) {
+        if (thread != null && thread.isAlive()) {
             thread.interrupt();
         }
 
         // stop registry
-        stopRegistry();
+        xxlJobExecutor.getExecutorRegistryThreadHelper().stop(xxlJobExecutor);
         logger.info(">>>>>>>>>>> xxl-job remoting server destroy success.");
     }
 
@@ -129,7 +134,7 @@ public class EmbedServer {
     // ---------------------- registry ----------------------
 
     /**
-     * netty_http
+     * netty_http server handler
      *
      * Copy from : https://github.com/xuxueli/xxl-rpc
      *
@@ -141,6 +146,7 @@ public class EmbedServer {
         private ExecutorBiz executorBiz;
         private String accessToken;
         private ThreadPoolExecutor bizThreadPool;
+
         public EmbedHttpServerHandler(ExecutorBiz executorBiz, String accessToken, ThreadPoolExecutor bizThreadPool) {
             this.executorBiz = executorBiz;
             this.accessToken = accessToken;
@@ -149,21 +155,20 @@ public class EmbedServer {
 
         @Override
         protected void channelRead0(final ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
-
             // request parse
             //final byte[] requestBytes = ByteBufUtil.getBytes(msg.content());    // byteBuf.toString(io.netty.util.CharsetUtil.UTF_8);
             String requestData = msg.content().toString(CharsetUtil.UTF_8);
             String uri = msg.uri();
             HttpMethod httpMethod = msg.method();
             boolean keepAlive = HttpUtil.isKeepAlive(msg);
-            String accessTokenReq = msg.headers().get(XxlJobRemotingUtil.XXL_JOB_ACCESS_TOKEN);
+            String accessTokenReq = msg.headers().get(Const.XXL_JOB_ACCESS_TOKEN);
 
             // invoke
             bizThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     // do invoke
-                    Object responseObj = process(httpMethod, uri, requestData, accessTokenReq);
+                    Object responseObj = dispatchRequest(httpMethod, uri, requestData, accessTokenReq);
 
                     // to json
                     String responseJson = GsonTool.toJson(responseObj);
@@ -174,43 +179,43 @@ public class EmbedServer {
             });
         }
 
-        private Object process(HttpMethod httpMethod, String uri, String requestData, String accessTokenReq) {
-
+        private Object dispatchRequest(HttpMethod httpMethod, String uri, String requestData, String accessTokenReq) {
             // valid
             if (HttpMethod.POST != httpMethod) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, HttpMethod not support.");
+                return Response.ofFail("invalid request, HttpMethod not support.");
             }
-            if (uri==null || uri.trim().length()==0) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
+            if (uri == null || uri.trim().isEmpty()) {
+                return Response.ofFail( "invalid request, uri-mapping empty.");
             }
-            if (accessToken!=null
-                    && accessToken.trim().length()>0
+            if (accessToken != null
+                    && !accessToken.trim().isEmpty()
                     && !accessToken.equals(accessTokenReq)) {
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "The access token is wrong.");
+                return Response.ofFail("The access token is wrong.");
             }
 
             // services mapping
             try {
-                if ("/beat".equals(uri)) {
-                    return executorBiz.beat();
-                } else if ("/idleBeat".equals(uri)) {
-                    IdleBeatParam idleBeatParam = GsonTool.fromJson(requestData, IdleBeatParam.class);
-                    return executorBiz.idleBeat(idleBeatParam);
-                } else if ("/run".equals(uri)) {
-                    TriggerParam triggerParam = GsonTool.fromJson(requestData, TriggerParam.class);
-                    return executorBiz.run(triggerParam);
-                } else if ("/kill".equals(uri)) {
-                    KillParam killParam = GsonTool.fromJson(requestData, KillParam.class);
-                    return executorBiz.kill(killParam);
-                } else if ("/log".equals(uri)) {
-                    LogParam logParam = GsonTool.fromJson(requestData, LogParam.class);
-                    return executorBiz.log(logParam);
-                } else {
-                    return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping("+ uri +") not found.");
+                switch (uri) {
+                    case "/beat":
+                        return executorBiz.beat();
+                    case "/idleBeat":
+                        IdleBeatRequest idleBeatParam = GsonTool.fromJson(requestData, IdleBeatRequest.class);
+                        return executorBiz.idleBeat(idleBeatParam);
+                    case "/run":
+                        TriggerRequest triggerParam = GsonTool.fromJson(requestData, TriggerRequest.class);
+                        return executorBiz.run(triggerParam);
+                    case "/kill":
+                        KillRequest killParam = GsonTool.fromJson(requestData, KillRequest.class);
+                        return executorBiz.kill(killParam);
+                    case "/log":
+                        LogRequest logParam = GsonTool.fromJson(requestData, LogRequest.class);
+                        return executorBiz.log(logParam);
+                    default:
+                        return Response.ofFail( "invalid request, uri-mapping(" + uri + ") not found.");
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "request error:" + ThrowableUtil.toString(e));
+                return Response.ofFail("request error:" + ThrowableTool.toString(e));
             }
         }
 
@@ -249,18 +254,5 @@ public class EmbedServer {
             }
         }
     }
-
-    // ---------------------- registry ----------------------
-
-    public void startRegistry(final String appname, final String address) {
-        // start registry
-        ExecutorRegistryThread.getInstance().start(appname, address);
-    }
-
-    public void stopRegistry() {
-        // stop registry
-        ExecutorRegistryThread.getInstance().toStop();
-    }
-
 
 }

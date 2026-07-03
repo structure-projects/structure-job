@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.0.1
  */
 @Data
-@Configuration
 @ConfigurationProperties(
         prefix = "structure.job"
 )
@@ -61,6 +60,6 @@ public class JobProperties {
         /**
          * 日志存储路径
          */
-        private String logpath = "/app/logs";
+        private String logpath = "./logs";
     }
 }

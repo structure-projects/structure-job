@@ -4,14 +4,13 @@ import cn.structure.job.dto.XxlJobInfoDTO;
 import cn.structure.job.enums.ExecutorRouteStrategyEnum;
 import cn.structure.job.properties.JobProperties;
 import cn.structure.job.rpc.XxlJobClient;
-import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
+import com.xxl.job.core.constant.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.glue.GlueTypeEnum;
+import com.xxl.tool.response.Response;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * 任务管理
@@ -36,8 +35,8 @@ public class JobManagerController {
     public String add() {
         System.out.println("add");
         XxlJobInfoDTO jobInfo = getXxlJobInfo();
-        ReturnT<String> returnT = xxlJobClient.add(jobInfo);
-        return returnT.getContent();
+        Response<String> response = xxlJobClient.add(jobInfo);
+        return response.getData();
     }
 
     @RequestMapping("/update/{id}")
@@ -46,29 +45,29 @@ public class JobManagerController {
         XxlJobInfoDTO jobInfo = getXxlJobInfo();
         jobInfo.setId(id);
         jobInfo.setJobDesc("更新描述");
-        ReturnT<String> returnT = xxlJobClient.update(jobInfo);
-        return returnT.getContent();
+        Response<String> response = xxlJobClient.update(jobInfo);
+        return response.getData();
     }
 
     @RequestMapping("/remove/{id}")
     public String remove(@PathVariable String id) {
         System.out.println("remove");
-        ReturnT<String> returnT = xxlJobClient.remove(id);
-        return returnT.getContent();
+        Response<String> response = xxlJobClient.remove(id);
+        return response.getData();
     }
 
     @RequestMapping("/pause/{id}")
     public String pause(@PathVariable String id) {
         System.out.println("pause");
-        ReturnT<String> returnT = xxlJobClient.pause(id);
-        return returnT.getContent();
+        Response<String> response = xxlJobClient.pause(id);
+        return response.getData();
     }
 
     @RequestMapping("/start/{id}")
     public String resume(@PathVariable String id) {
         System.out.println("resume");
-        ReturnT<String> returnT = xxlJobClient.start(id);
-        return returnT.getContent();
+        Response<String> response = xxlJobClient.start(id);
+        return response.getData();
     }
 
     private XxlJobInfoDTO getXxlJobInfo() {
