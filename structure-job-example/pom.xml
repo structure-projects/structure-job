@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.springframework.boot</groupId>
     <artifactId>structure-job-example</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>structure-job-example</name>
     <url>http://maven.apache.org</url>
 
@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <structure.version>1.4.3</structure.version>
         <xxl-job.version>3.4.2</xxl-job.version>
-        <structure-job.version>1.0.4-SNAPSHOT</structure-job.version>
+        <structure-job.version>2.0.0-SNAPSHOT</structure-job.version>
     </properties>
 
 

@@ -51,3 +51,5 @@ spring:
   config:
     activate:
       on-profile: pro
+    import:
+      - optional:nacos:${spring.application.name}.yaml?refreshEnabled=true
