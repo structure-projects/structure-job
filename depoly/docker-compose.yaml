@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   structure-job:
-    image: structure-job:1.0.1
+    image: registry.cn-hangzhou.aliyuncs.com/structured/structured-job-center:2.0.0
     restart: always
     hostname: structure-job #服务内不使用host进行通信一定要配置
     deploy: # 这个是编排配置默认节点配置为1 通常这个在配置在docker swarm 环境下使用
